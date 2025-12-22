@@ -3,15 +3,44 @@
 import React from "react";
 
 export type Subcat = { key: string; label: string };
-export type ModuleNode = { key: string; label: string; subcategories: Subcat[] };
+export type ModuleNode = { key: string; label: string; subcategories?: Subcat[] };
 
-export function Sidebar(props: {
+type SidebarProps = {
   modules: ModuleNode[];
-  activeModule: string;
-  activeSubcat: string;
-  onSelect: (moduleKey: string, subcatKey: string) => void;
-}) {
-  const { modules, activeModule, activeSubcat, onSelect } = props;
+
+  // NEW style
+  activeModule?: string;
+  activeSubcat?: string;
+  onSelect?: (moduleKey: string, subcatKey: string) => void;
+
+  // OLD style (compat)
+  selectedModule?: string;
+  selectedSubcategory?: string;
+  onSelectModule?: (moduleKey: string) => void;
+  onSelectSubcat?: (subcatKey: string) => void;
+};
+
+export function Sidebar(props: SidebarProps) {
+  const modules = props.modules ?? [];
+
+  // Accept both naming styles
+  const activeModule = props.activeModule ?? props.selectedModule ?? modules[0]?.key ?? "";
+  const activeSubcat =
+    props.activeSubcat ??
+    props.selectedSubcategory ??
+    modules.find((m) => m.key === activeModule)?.subcategories?.[0]?.key ??
+    "";
+
+  const doSelect = (moduleKey: string, subcatKey: string) => {
+    // Prefer NEW handler
+    if (props.onSelect) {
+      props.onSelect(moduleKey, subcatKey);
+      return;
+    }
+    // Fallback to OLD handlers
+    props.onSelectModule?.(moduleKey);
+    props.onSelectSubcat?.(subcatKey);
+  };
 
   return (
     <aside className="sidebar">
@@ -33,7 +62,7 @@ export function Sidebar(props: {
           <div key={m.key} className="navGroup">
             <div
               className={"navItem" + (isActiveModule ? " active" : "")}
-              onClick={() => onSelect(m.key, firstSub)}
+              onClick={() => doSelect(m.key, firstSub)}
               role="button"
               tabIndex={0}
             >
@@ -47,7 +76,7 @@ export function Sidebar(props: {
                   <div
                     key={sc.key}
                     className={"subItem" + (isActiveSub ? " active" : "")}
-                    onClick={() => onSelect(m.key, sc.key)}
+                    onClick={() => doSelect(m.key, sc.key)}
                     role="button"
                     tabIndex={0}
                   >
@@ -61,3 +90,7 @@ export function Sidebar(props: {
     </aside>
   );
 }
+
+// ALSO export default to avoid import mismatch:
+// import Sidebar from "./Sidebar" OR import { Sidebar } from "./Sidebar"
+export default Sidebar;
