@@ -2,99 +2,74 @@ import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 
-type SurveySchema = {
-  title?: string;
-  pages?: Array<{
-    title?: string | { default?: string; [k: string]: any };
-    elements?: Array<{ question_id?: string | number; name?: string }>;
-  }>;
-};
-
-function titleToString(t: any) {
-  if (!t) return "";
-  if (typeof t === "string") return t;
-  if (typeof t === "object") return t.default ?? t.en ?? t.es ?? t["pt-br"] ?? "";
-  return String(t);
+function readJson(relPath: string) {
+  const p = path.join(process.cwd(), relPath);
+  const raw = fs.readFileSync(p, "utf8");
+  return JSON.parse(raw);
 }
 
-function uniq<T>(arr: T[]) {
-  return Array.from(new Set(arr));
+function elementTitles(survey: any, pageTitle: string): string[] {
+  const page = (survey?.pages ?? []).find((p: any) => p?.title === pageTitle);
+  if (!page) return [];
+  return (page.elements ?? [])
+    .map((e: any) => {
+      const t = e?.title;
+      if (!t) return "";
+      if (typeof t === "string") return t.trim();
+      if (typeof t === "object") return (t.default ?? "").trim();
+      return "";
+    })
+    .filter(Boolean);
 }
 
 export async function GET() {
-  const dataDir = path.join(process.cwd(), "data");
+  // Put your JSON files in /data exactly like this (recommended):
+  // data/JSON file Education Landscape v2.json
+  // data/JSON file Organisational Adoption Study.json
+  const el = readJson("data/JSON file Education Landscape v2.json");
+  const oa = readJson("data/JSON file Organisational Adoption Study.json");
 
-  const elPath = path.join(dataDir, "JSON file Education Landscape v2.json");
-  const oaPath = path.join(dataDir, "JSON file Organisational Adoption Study.json");
-
-  if (!fs.existsSync(elPath) || !fs.existsSync(oaPath)) {
-    return NextResponse.json(
+  // VIDEO-LIKE 4 subcategories
+  const EL = {
+    key: "EL",
+    label: "Education Landscape",
+    subcategories: [
       {
-        error:
-          "Schema JSON files not found. Place them in /data as: 'JSON file Education Landscape v2.json' and 'JSON file Organisational Adoption Study.json'.",
+        key: "EL_HEP",
+        label: "Higher education programmes",
+        pages: ["Educational Units", "Learning Outcomes", "Educational Framework"],
       },
-      { status: 404 }
-    );
-  }
+      { key: "EL_RES", label: "Research", pages: ["Research"] },
+      { key: "EL_SC", label: "Short courses & training", pages: ["Short Courses and BIM-related Training"] },
+      {
+        key: "EL_COLLAB",
+        label: "Collaboration",
+        pages: ["Collaboration between academia, government and/or industry"],
+      },
+    ],
+  };
 
-  const el: SurveySchema = JSON.parse(fs.readFileSync(elPath, "utf-8"));
-  const oa: SurveySchema = JSON.parse(fs.readFileSync(oaPath, "utf-8"));
+  const OA = {
+    key: "OA",
+    label: "Organisational Adoption",
+    subcategories: [
+      { key: "OA_ORG", label: "Organisation information", pages: ["Organisation information"] },
+      { key: "OA_ADOPT", label: "Adoption", pages: ["Adoption"] },
+      { key: "OA_TD", label: "Targeted deliverables", pages: ["Targeted deliverables"] },
+      { key: "OA_INT", label: "Interoperability", pages: ["Interoperability"] },
+    ],
+  };
 
-  // --- EL (8 pages in JSON) -> 4 video-style subcategories
-  const elPages = el.pages ?? [];
-  const byTitle = new Map<string, string[]>();
-
-  for (const p of elPages) {
-    const pt = titleToString(p.title);
-    const ids =
-      (p.elements ?? [])
-        .map((e) => (e.question_id ?? e.name ?? "").toString())
-        .filter(Boolean) ?? [];
-    byTitle.set(pt, ids);
-  }
-
-  // These names match your EL JSON “default” titles
-  const elGeneral = byTitle.get("General") ?? [];
-  const elEduUnits = byTitle.get("Educational Units") ?? [];
-  const elLearning = byTitle.get("Learning Outcomes") ?? [];
-  const elFramework = byTitle.get("Educational Framework") ?? [];
-  const elResearch = byTitle.get("Research") ?? [];
-  const elShort = byTitle.get("Short Courses and BIM-related Training") ?? [];
-  const elCollab = byTitle.get("Collaboration between academia, government and/or industry") ?? [];
-  const elAdditional = byTitle.get("Additional Info") ?? [];
-
-  const EL = [
-    {
-      key: "EL_HEP",
-      label: "Higher education programmes",
-      questionIds: uniq([...elGeneral, ...elEduUnits, ...elLearning, ...elFramework]),
-    },
-    { key: "EL_RES", label: "Research", questionIds: uniq([...elResearch]) },
-    { key: "EL_SC", label: "Short courses & BIM training", questionIds: uniq([...elShort]) },
-    { key: "EL_COL", label: "Collaboration", questionIds: uniq([...elCollab]) },
-    // If you want, we can add “Additional Info” as a 5th section, but video shows 4.
-    // { key: "EL_ADD", label: "Additional Info", questionIds: uniq([...elAdditional]) },
-  ];
-
-  // --- OA (already 4 pages)
-  const oaPages = oa.pages ?? [];
-  const OA = oaPages.map((p, idx) => {
-    const label = titleToString(p.title) || `Section ${idx + 1}`;
-    const questionIds =
-      (p.elements ?? [])
-        .map((e) => (e.question_id ?? e.name ?? "").toString())
-        .filter(Boolean) ?? [];
-    return { key: `OA_${idx + 1}`, label, questionIds: uniq(questionIds) };
+  // Expand to question titles (exact matching against Excel “Item Title”)
+  const expand = (mod: any, survey: any) => ({
+    ...mod,
+    subcategories: mod.subcategories.map((sc: any) => {
+      const titles = sc.pages.flatMap((pt: string) => elementTitles(survey, pt));
+      return { ...sc, titles };
+    }),
   });
 
-  // PE: keep as a single bucket for now (unless you have a PE JSON schema too)
-  const PE = [{ key: "PE_ALL", label: "All", questionIds: [] as string[] }];
-
   return NextResponse.json({
-    sections: {
-      EL,
-      OA,
-      PE,
-    },
+    modules: [expand(EL, el), expand(OA, oa)],
   });
 }
