@@ -1,22 +1,15 @@
 "use client";
 
-import type { KeyboardEvent } from "react";
+type ModuleKey = string;
 
-export type ModuleNode = {
-  key: string;
-  label: string;
-  subcategories?: { key: string; label: string }[];
-};
-
-function isActivationKey(e: KeyboardEvent<HTMLElement>) {
-  return e.key === "Enter" || e.key === " ";
-}
+export type Subcat = { key: string; label: string };
+export type ModuleNode = { key: string; label: string; subcategories: Subcat[] };
 
 export function Sidebar(props: {
   modules: ModuleNode[];
-  activeModule: string;
+  activeModule: ModuleKey;
   activeSubcat: string;
-  onSelect: (moduleKey: string, subcatKey: string) => void;
+  onSelect: (moduleKey: ModuleKey, subcatKey: string) => void;
 }) {
   const { modules, activeModule, activeSubcat, onSelect } = props;
 
@@ -34,48 +27,32 @@ export function Sidebar(props: {
 
       {modules.map((m) => {
         const isActiveModule = m.key === activeModule;
-        const subcats = m.subcategories ?? [];
-        const defaultSubcat = subcats[0]?.key ?? "";
-
         return (
           <div key={m.key} className="navGroup">
             <div
-              className={`navItem${isActiveModule ? " active" : ""}`}
+              className={"navItem" + (isActiveModule ? " active" : "")}
+              onClick={() => onSelect(m.key, m.subcategories?.[0]?.key ?? "")}
               role="button"
               tabIndex={0}
-              onClick={() => onSelect(m.key, activeSubcat || defaultSubcat)}
-              onKeyDown={(e) => {
-                if (!isActivationKey(e)) return;
-                e.preventDefault();
-                onSelect(m.key, activeSubcat || defaultSubcat);
-              }}
             >
               <span>{m.label}</span>
             </div>
 
-            {isActiveModule && subcats.length > 0 && (
-              <div>
-                {subcats.map((sc) => {
-                  const isActiveSub = sc.key === activeSubcat;
-                  return (
-                    <div
-                      key={sc.key}
-                      className={`subItem${isActiveSub ? " active" : ""}`}
-                      role="button"
-                      tabIndex={0}
-                      onClick={() => onSelect(m.key, sc.key)}
-                      onKeyDown={(e) => {
-                        if (!isActivationKey(e)) return;
-                        e.preventDefault();
-                        onSelect(m.key, sc.key);
-                      }}
-                    >
-                      {sc.label}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+            {isActiveModule &&
+              (m.subcategories ?? []).map((sc) => {
+                const active = sc.key === activeSubcat;
+                return (
+                  <div
+                    key={sc.key}
+                    className={"subItem" + (active ? " active" : "")}
+                    onClick={() => onSelect(m.key, sc.key)}
+                    role="button"
+                    tabIndex={0}
+                  >
+                    {sc.label}
+                  </div>
+                );
+              })}
           </div>
         );
       })}
