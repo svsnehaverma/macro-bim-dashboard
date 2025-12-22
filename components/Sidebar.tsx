@@ -1,15 +1,15 @@
 "use client";
 
-type ModuleKey = string;
+import React from "react";
 
 export type Subcat = { key: string; label: string };
 export type ModuleNode = { key: string; label: string; subcategories: Subcat[] };
 
 export function Sidebar(props: {
   modules: ModuleNode[];
-  activeModule: ModuleKey;
+  activeModule: string;
   activeSubcat: string;
-  onSelect: (moduleKey: ModuleKey, subcatKey: string) => void;
+  onSelect: (moduleKey: string, subcatKey: string) => void;
 }) {
   const { modules, activeModule, activeSubcat, onSelect } = props;
 
@@ -27,11 +27,13 @@ export function Sidebar(props: {
 
       {modules.map((m) => {
         const isActiveModule = m.key === activeModule;
+        const firstSub = m.subcategories?.[0]?.key ?? "";
+
         return (
           <div key={m.key} className="navGroup">
             <div
               className={"navItem" + (isActiveModule ? " active" : "")}
-              onClick={() => onSelect(m.key, m.subcategories?.[0]?.key ?? "")}
+              onClick={() => onSelect(m.key, firstSub)}
               role="button"
               tabIndex={0}
             >
@@ -40,11 +42,11 @@ export function Sidebar(props: {
 
             {isActiveModule &&
               (m.subcategories ?? []).map((sc) => {
-                const active = sc.key === activeSubcat;
+                const isActiveSub = sc.key === activeSubcat;
                 return (
                   <div
                     key={sc.key}
-                    className={"subItem" + (active ? " active" : "")}
+                    className={"subItem" + (isActiveSub ? " active" : "")}
                     onClick={() => onSelect(m.key, sc.key)}
                     role="button"
                     tabIndex={0}
