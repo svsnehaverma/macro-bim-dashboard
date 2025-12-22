@@ -1,19 +1,17 @@
 "use client";
 
-type ModuleKey = "EL" | "OA" | "PE" | string;
+type ModuleKey = string;
 
-const moduleNames: Record<string, string> = {
-  EL: "Education Landscape",
-  OA: "Organisational Adoption",
-  PE: "Policy Environment",
-};
+export type Subcat = { key: string; label: string };
+export type ModuleNode = { key: string; label: string; subcategories: Subcat[] };
 
 export function Sidebar(props: {
-  modules: ModuleKey[];
+  modules: ModuleNode[];
   activeModule: ModuleKey;
-  onSelectModule: (m: ModuleKey) => void;
+  activeSubcat: string;
+  onSelect: (moduleKey: ModuleKey, subcatKey: string) => void;
 }) {
-  const { modules, activeModule, onSelectModule } = props;
+  const { modules, activeModule, activeSubcat, onSelect } = props;
 
   return (
     <aside className="sidebar">
@@ -26,18 +24,35 @@ export function Sidebar(props: {
       </div>
 
       <div className="navTitle">Dashboards</div>
+
       {modules.map((m) => {
-        const label = moduleNames[m] ?? m;
-        const active = m === activeModule;
+        const isActiveModule = m.key === activeModule;
         return (
-          <div
-            key={m}
-            className={"navItem" + (active ? " active" : "")}
-            onClick={() => onSelectModule(m)}
-            role="button"
-            tabIndex={0}
-          >
-            <span>{label}</span>
+          <div key={m.key} className="navGroup">
+            <div
+              className={"navItem" + (isActiveModule ? " active" : "")}
+              onClick={() => onSelect(m.key, m.subcategories?.[0]?.key ?? "")}
+              role="button"
+              tabIndex={0}
+            >
+              <span>{m.label}</span>
+            </div>
+
+            {isActiveModule &&
+              (m.subcategories ?? []).map((sc) => {
+                const active = sc.key === activeSubcat;
+                return (
+                  <div
+                    key={sc.key}
+                    className={"subItem" + (active ? " active" : "")}
+                    onClick={() => onSelect(m.key, sc.key)}
+                    role="button"
+                    tabIndex={0}
+                  >
+                    {sc.label}
+                  </div>
+                );
+              })}
           </div>
         );
       })}
