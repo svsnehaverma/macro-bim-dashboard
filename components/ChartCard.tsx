@@ -16,21 +16,25 @@ import {
 export type SeriesPoint = { name: string; value: number };
 
 const palette = [
-  "#E11D2E", // red (primary)
-  "#111827", // near-black
-  "#9CA3AF", // grey
-  "#60A5FA", // blue
-  "#F59E0B", // amber
-  "#10B981", // green
+  "#ef4444",
+  "#111827",
+  "#60a5fa",
+  "#9ca3af",
+  "#f97316",
+  "#10b981",
+  "#a78bfa",
+  "#22c55e",
+  "#f59e0b",
+  "#06b6d4",
 ];
 
 function pct(v: number, total: number) {
-  if (!total) return "0.0%";
+  if (!total) return "0%";
   return ((v / total) * 100).toFixed(1) + "%";
 }
 
-const truncate = (s: string, n = 44) => {
-  const str = String(s ?? "");
+const truncate = (s: string, n = 28) => {
+  const str = String(s ?? "").trim();
   return str.length > n ? str.slice(0, n - 1) + "…" : str;
 };
 
@@ -40,144 +44,109 @@ export function ChartCard(props: {
   total: number;
   series: SeriesPoint[];
 }) {
-  const { title, total, series } = props;
+  const { title, itemId, total, series } = props;
 
-  // Sort (safest if caller didn't)
-  const sorted = [...series].sort((a, b) => b.value - a.value);
+  // Decide chart type
+  const isPie = series.length <= 6;
 
-  // Video-style cards usually show a few categories; keep top 6 for the donut legend.
-  // If there are many, switch to bars and show top 10.
-  const isPie = sorted.length <= 6;
-  const pieData = sorted.slice(0, 6);
-  const barData = sorted.slice(0, 10);
+  // Keep top N categories for clean visuals
+  const top = series.slice(0, 10);
+  const restCount = Math.max(0, series.length - top.length);
 
   return (
-    <section className="card">
-      <header className="cardHeader">
-        <h3 className="cardTitle" title={title}>
+    <div className="card">
+      <div className="cardHeader">
+        <div className="cardTitle" title={title}>
           {title}
-        </h3>
-      </header>
-
-      <div className="cardContent">
-        {isPie ? (
-          <div className="cardGrid">
-            {/* Chart (left) */}
-            <div className="chartPane">
-              <div className="chartBox">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={pieData}
-                      dataKey="value"
-                      nameKey="name"
-                      innerRadius={62}
-                      outerRadius={86}
-                      paddingAngle={2}
-                      stroke="#ffffff"
-                      strokeWidth={3}
-                      isAnimationActive={false}
-                      // show values around donut (like the video)
-                      labelLine
-                      label={({ value }) => (value ? String(value) : "")}
-                    >
-                      {pieData.map((_, i) => (
-                        <Cell key={i} fill={palette[i % palette.length]} />
-                      ))}
-                    </Pie>
-
-                    <Tooltip
-                      formatter={(value: any, _name: any, item: any) => {
-                        const full = item?.payload?.name ?? _name;
-                        return [value, full];
-                      }}
-                      contentStyle={{
-                        borderRadius: 12,
-                        border: "1px solid #E5E7EB",
-                        boxShadow: "0 12px 30px rgba(0,0,0,0.10)",
-                      }}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            {/* Legend (right) */}
-            <div className="legendPane">
-              <div className="legendList">
-                {pieData.map((s, i) => (
-                  <div className="legendRow" key={`${s.name}-${i}`}>
-                    <div className="legendLeft">
-                      <span
-                        className="legendDot"
-                        style={{ background: palette[i % palette.length] }}
-                      />
-                      <span className="legendLabel" title={s.name}>
-                        {truncate(s.name, 52)}
-                      </span>
-                    </div>
-
-                    <div className="legendRight">
-                      <span className="legendPct">{pct(s.value, total)}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="legendFooter">
-                <span className="muted">Total responses</span>
-                <b className="totalNumber">{total}</b>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="cardGrid single">
-            <div className="chartPane wide">
-              <div className="chartBox tall">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={barData}
-                    layout="vertical"
-                    margin={{ left: 24, right: 14, top: 8, bottom: 8 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis type="number" />
-                    <YAxis
-                      type="category"
-                      dataKey="name"
-                      width={200}
-                      tick={{ fontSize: 11 }}
-                      tickFormatter={(v) => truncate(String(v), 34)}
-                    />
-                    <Tooltip
-                      formatter={(value: any, _name: any, item: any) => {
-                        const full = item?.payload?.name ?? _name;
-                        return [value, full];
-                      }}
-                      contentStyle={{
-                        borderRadius: 12,
-                        border: "1px solid #E5E7EB",
-                        boxShadow: "0 12px 30px rgba(0,0,0,0.10)",
-                      }}
-                    />
-                    <Bar
-                      dataKey="value"
-                      fill={palette[0]}
-                      radius={[10, 10, 10, 10]}
-                      isAnimationActive={false}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-
-              <div className="legendFooter" style={{ marginTop: 10 }}>
-                <span className="muted">Total responses</span>
-                <b className="totalNumber">{total}</b>
-              </div>
-            </div>
-          </div>
-        )}
+        </div>
+        <div className="cardMeta">
+          {itemId ? <span className="pill">ID: {itemId}</span> : null}
+          <span className="pill">Total: {total}</span>
+          <span className="pill">Options: {series.length}</span>
+        </div>
       </div>
-    </section>
+
+      <div className="cardBody">
+        <div className="chartWrap">
+          <ResponsiveContainer width="100%" height="100%">
+            {isPie ? (
+              <PieChart>
+                <Pie
+                  data={top}
+                  dataKey="value"
+                  nameKey="name"
+                  innerRadius={62}
+                  outerRadius={90}
+                  paddingAngle={2}
+                  stroke="#fff"
+                  strokeWidth={2}
+                  isAnimationActive={false}
+                >
+                  {top.map((_, i) => (
+                    <Cell key={i} fill={palette[i % palette.length]} />
+                  ))}
+                </Pie>
+
+                {/* Full labels in tooltip */}
+                <Tooltip
+                  formatter={(value: any, _name: any, item: any) => {
+                    const full = item?.payload?.name ?? _name;
+                    return [value, full];
+                  }}
+                />
+              </PieChart>
+            ) : (
+              <BarChart
+                data={top}
+                layout="vertical"
+                margin={{ left: 28, right: 12, top: 10, bottom: 10 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis type="number" tick={{ fontSize: 11 }} />
+                <YAxis
+                  type="category"
+                  dataKey="name"
+                  width={180}
+                  tick={{ fontSize: 11 }}
+                  tickFormatter={(v) => truncate(String(v), 28)}
+                />
+                <Tooltip
+                  formatter={(value: any, _name: any, item: any) => {
+                    const full = item?.payload?.name ?? _name;
+                    return [value, full];
+                  }}
+                />
+                <Bar dataKey="value" fill="#ef4444" radius={[10, 10, 10, 10]} isAnimationActive={false} />
+              </BarChart>
+            )}
+          </ResponsiveContainer>
+        </div>
+
+        {/* Clean legend list (scroll if too long) */}
+        <div className="legend">
+          {top.map((s, i) => (
+            <div key={s.name} className="legendRow">
+              <div className="legendLeft">
+                <span
+                  className="dot"
+                  style={{ background: isPie ? palette[i % palette.length] : "#ef4444" }}
+                />
+                <span className="legendLabel" title={s.name}>
+                  {s.name}
+                </span>
+              </div>
+              <div className="legendRight">
+                <span className="legendValue">{s.value}</span>
+                <span className="legendPct">{pct(s.value, total)}</span>
+              </div>
+            </div>
+          ))}
+
+          {restCount > 0 ? (
+            <div className="legendNote">Showing top {top.length}. Hidden: {restCount} options.</div>
+          ) : null}
+        </div>
+      </div>
+    </div>
   );
 }
