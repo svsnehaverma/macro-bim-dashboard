@@ -1,116 +1,86 @@
-Macro BIM Adoption Dashboard
+# Macro BIM Adoption Dashboard
 
-A Next.js-based interactive dashboard for visualising BIM Macro Adoption survey data (Education Landscape & Organisational Adoption studies).
+A web-based interactive dashboard for visualising **Macro BIM Adoption survey data** (Education Landscape & Organisational Adoption) using Excel datasets.
 
-This dashboard reads survey data from Excel (.xlsx) files, aggregates responses server-side, and presents results using interactive charts and tables, similar to the Macro BIM adoption dashboards demonstrated in project videos.
+This project is built with **Next.js (App Router)** and is designed to run **entirely on Vercel**, without Docker, GraphQL, or a separate backend server.
 
-✨ Features
+---
 
-📊 Interactive donut (pie) charts, bar charts, and tables
+##  Features
 
-🌍 Country-based filtering (derived from Excel filenames)
+- 📊 Interactive dashboard with:
+  - Donut (pie) charts
+  - Horizontal bar charts
+  - Tabular summaries
+- Country-based filtering (e.g. ECU, PER, BRA)
+- Reads survey data directly from Excel (`.xlsx`) files
+- Server-side aggregation using Next.js API routes
+- Vercel-ready deployment
+- No database or backend required
 
-📁 Reads survey data directly from Excel files
+---
 
-⚡ No backend / database required
+##  Project Structure
 
-🚀 Deploys easily on Vercel
 
-🔒 No GraphQL, Docker, or external services needed
+---
 
-🧱 Tech Stack
+## 📊 Data Format
 
-Next.js (App Router)
+The dashboard expects Excel files that contain a sheet named **`Answers`** (or equivalent), with columns similar to:
 
-TypeScript
+- `Item ID`
+- `Item Title`
+- `User Input`
+- (other metadata columns are ignored)
 
-Recharts – data visualisation
+Each row represents **one survey response**.
 
-xlsx – Excel parsing
+The dashboard automatically:
+- groups responses by question
+- counts answer frequencies
+- calculates percentages for visualisation
 
-Node.js (server-side API routes)
+---
 
-Project Structure
-macro-bim-dashboard/
-├── app/
-│   ├── api/
-│   │   └── summary/route.ts   # Server-side Excel aggregation
-│   └── page.tsx               # Main dashboard UI
-├── data/
-│   └── EL_ECU.xlsx             # Survey data (example)
-├── components/                # UI components (charts, layout)
-├── package.json
-└── README.md
+##  Tech Stack
 
-Data Format
+- **Next.js 14** (App Router)
+- **React**
+- **TypeScript**
+- **xlsx** – for reading Excel files
+- **Recharts** – for charts
+- **Vercel** – hosting & deployment
 
-The dashboard expects Excel files exported from BIM adoption surveys with a sheet such as Answers containing columns like:
+---
 
-Item ID
+## Run Locally
 
-Item Title
+### 1. Install dependencies
 
-User Input
+**`npm install`**
 
-Each row represents one response to one question (long format).
-
-Country/module information is inferred from the filename, e.g.:
-
-EL - ECU XLSX Report - BIMei Macro Adoption Study.xlsx
-
-Run Locally
-1. Clone the repository
-git clone https://github.com/<your-username>/macro-bim-dashboard.git
-cd macro-bim-dashboard
-
-2. Install dependencies
-npm install
-
-3. Start development server
+2. Start development server
 npm run dev
 
-
-Open in browser:
+Open in your browser:
 
 http://localhost:3000
 
-
-To test the data API directly:
+API endpoint (for debugging):
 
 http://localhost:3000/api/summary
 
-🚀 Deploy on Vercel
+Deploy on Vercel
 
-Push the repository to GitHub
+Push this repository to GitHub
 
 Go to https://vercel.com
 
 Click New Project
 
-Import this GitHub repository
+Import the GitHub repository
 
 Click Deploy
 
-No special configuration required.
-
-How It Works (Brief)
-
-Excel files are read server-side using a Next.js API route
-
-Responses are aggregated by:
-
-question (Item ID / Item Title)
-
-answer (User Input)
-
-The frontend fetches aggregated JSON and renders charts dynamically
-
-This approach avoids:
-
-backend servers
-
-databases
-
-GraphQL APIs
-
-Docker
+No additional configuration is required.
