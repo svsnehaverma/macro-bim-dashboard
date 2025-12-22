@@ -1,108 +1,261 @@
-/* ---------- Base reset ---------- */
+/* ========= Base ========= */
+:root{
+  --bg: #F3F6FB;
+  --panel: #FFFFFF;
+  --text: #111827;
+  --muted: #6B7280;
+  --border: #E6EAF2;
+  --shadow: 0 10px 28px rgba(16, 24, 40, 0.08);
+  --shadow-soft: 0 6px 18px rgba(16, 24, 40, 0.06);
+  --radius: 18px;
+  --radius-sm: 14px;
+}
+
 *,
 *::before,
-*::after {
+*::after{
   box-sizing: border-box;
 }
 
-html,
-body {
-  padding: 0;
+html, body{
+  height: 100%;
+}
+
+body{
   margin: 0;
-  background: #f9fafb;
-  color: #111827;
+  background: var(--bg);
+  color: var(--text);
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial,
-    "Apple Color Emoji", "Segoe UI Emoji";
+    "Apple Color Emoji","Segoe UI Emoji";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* ---------- Layout ---------- */
-main {
-  padding: 20px;
+a{ color: inherit; text-decoration: none; }
+
+/* ========= Page container ========= */
+main{
+  padding: 18px 18px 30px;
 }
 
-/* ---------- Card ---------- */
-.card {
-  background: #ffffff;
-  border-radius: 14px;
-  border: 1px solid #e5e7eb;
-  padding: 14px 14px 12px 14px;
+/* ========= Card (Video-style) ========= */
+.card{
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
+  padding: 16px 16px 14px;
   display: flex;
   flex-direction: column;
   min-height: 100%;
+  transition: transform 120ms ease, box-shadow 120ms ease;
 }
 
-/* ---------- Card title (question text) ---------- */
-.cardTitle {
+.card:hover{
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
+}
+
+/* header */
+.cardHeader{
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+/* Title clamps neatly like the video */
+.cardTitle{
+  margin: 0;
   font-size: 14px;
   font-weight: 600;
   line-height: 1.25;
-  margin-bottom: 10px;
+  letter-spacing: -0.01em;
 
-  /* clamp to 2 lines to avoid overlap */
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-/* ---------- Card body ---------- */
-.cardBody {
+/* content */
+.cardContent{
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Two-column layout: donut left, legend right */
+.cardGrid{
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 14px;
+  align-items: center;
+}
+
+.cardGrid.single{
+  grid-template-columns: 1fr;
+}
+
+/* Chart area */
+.chartPane{
+  min-width: 0;
+}
+
+.chartPane.wide{
+  width: 100%;
+}
+
+.chartBox{
+  width: 100%;
+  height: 220px;
+  border-radius: var(--radius-sm);
+  background: #ffffff;
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.chartBox.tall{
+  height: 260px;
+}
+
+/* Legend */
+.legendPane{
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-/* ---------- Legend / table ---------- */
-.legend {
+.legendList{
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  /* prevents ugly overflow when many lines */
+  max-height: 190px;
+  overflow: auto;
+  padding-right: 6px;
+}
+
+.legendRow{
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.legendLeft{
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+}
+
+.legendDot{
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
   margin-top: 4px;
+  flex: 0 0 auto;
+}
+
+.legendLabel{
   font-size: 12px;
-  color: #374151;
+  line-height: 1.25;
+  color: #111827;
+
+  /* wrap like the video (2 lines max) */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-width: 0;
 }
 
-.legend > div {
-  border-bottom: 1px dashed #e5e7eb;
+.legendRight{
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: flex-end;
+  min-width: 68px;
 }
 
-.legend > div:last-child {
-  border-bottom: none;
+.legendPct{
+  font-size: 12px;
+  font-weight: 700;
+  color: #111827;
 }
 
-/* ---------- Tooltip polish (Recharts) ---------- */
-.recharts-tooltip-wrapper {
-  z-index: 20;
+/* Footer inside legend */
+.legendFooter{
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border);
 }
 
-.recharts-default-tooltip {
+.muted{
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.totalNumber{
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+/* ========= Recharts polish ========= */
+.recharts-tooltip-wrapper{
+  z-index: 50;
+}
+
+.recharts-default-tooltip{
   background: #ffffff !important;
-  border-radius: 10px !important;
-  border: 1px solid #e5e7eb !important;
-  padding: 8px 10px !important;
+  border-radius: 12px !important;
+  border: 1px solid var(--border) !important;
+  padding: 10px 12px !important;
   font-size: 12px !important;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow) !important;
 }
 
-/* ---------- Axis text ---------- */
-.recharts-cartesian-axis-tick-value {
-  fill: #374151;
+.recharts-cartesian-axis-tick-value{
+  fill: #4B5563;
   font-size: 11px;
 }
 
-/* ---------- Scrollbar (optional, clean) ---------- */
-::-webkit-scrollbar {
-  height: 8px;
+/* ========= Scrollbar (subtle) ========= */
+::-webkit-scrollbar{
   width: 8px;
+  height: 8px;
 }
-
-::-webkit-scrollbar-track {
+::-webkit-scrollbar-track{
   background: transparent;
 }
-
-::-webkit-scrollbar-thumb {
-  background: #d1d5db;
-  border-radius: 8px;
+::-webkit-scrollbar-thumb{
+  background: #D7DCE8;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover{
+  background: #C7CDDD;
 }
 
-/* ---------- Utility ---------- */
-.muted {
-  color: #6b7280;
+/* ========= Small screens ========= */
+@media (max-width: 900px){
+  .cardGrid{
+    grid-template-columns: 1fr;
+  }
+  .legendList{
+    max-height: 160px;
+  }
+  .chartBox{
+    height: 210px;
+  }
 }
