@@ -32,7 +32,7 @@ export function Sidebar(props: {
         return (
           <div
             key={m}
-            className={"navItem" + (active ? " active" : "")}
+            className={"navItem" + (active ? " active": "")}
             onClick={() => onSelectModule(m)}
             role="button"
             tabIndex={0}
