@@ -141,13 +141,13 @@ export default function Home() {
   return (
     <div className="shell">
       <Sidebar
-        modules={sidebarModules.length ? sidebarModules : [
-          { key: "EL", label: "Education Landscape", subcategories: [{ key: "EL_HEP", label: "Higher education programmes" }] },
-          { key: "OA", label: "Organisational Adoption", subcategories: [{ key: "OA_ORG", label: "Organisation information" }] },
-        ]}
+        modules={sidebarModules}
         activeModule={moduleKey}
         activeSubcat={subcatKey}
-        onSelect={onSelect}
+        onSelect={(m, sc) => {
+          setModuleKey(m);
+          setModuleKey(m);
+        }}
       />
 
       <div className="content">
