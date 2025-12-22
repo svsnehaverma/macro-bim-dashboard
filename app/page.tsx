@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Sidebar } from "../components/Sidebar";
+import { Sidebar, SidebarSection } from "../components/Sidebar";
 import { Topbar } from "../components/Topbar";
 import { ChartCard } from "../components/ChartCard";
 
@@ -27,13 +27,22 @@ type Summary = {
   questions: SummaryQuestion[];
 };
 
+type SchemaResponse = {
+  sections: Record<string, Array<{ key: string; label: string; questionIds: string[] }>>;
+};
+
 export default function Home() {
   const [manifest, setManifest] = useState<Manifest | null>(null);
+  const [schema, setSchema] = useState<SchemaResponse | null>(null);
+
   const [moduleKey, setModuleKey] = useState<string>("EL");
   const [country, setCountry] = useState<string>("ECU");
   const [search, setSearch] = useState<string>("");
   const [summary, setSummary] = useState<Summary | null>(null);
   const [err, setErr] = useState<string | null>(null);
+
+  // NEW: section/subcategory state
+  const [sectionKey, setSectionKey] = useState<string>("");
 
   useEffect(() => {
     fetch("/api/manifest")
@@ -46,19 +55,44 @@ export default function Home() {
       .catch((e) => setErr(String(e?.message ?? e)));
   }, []);
 
+  // load schema (EL/OA subcategories from your JSON)
+  useEffect(() => {
+    fetch("/api/schema")
+      .then((r) => r.json())
+      .then((s: SchemaResponse) => {
+        if ((s as any)?.error) throw new Error((s as any).error);
+        setSchema(s);
+      })
+      .catch((e) => setErr(String(e?.message ?? e)));
+  }, []);
+
   const availableCountries = useMemo(() => {
     const mod = manifest?.modules?.find((m) => m.key === moduleKey);
     const list = mod?.countries?.length ? mod.countries : ["ECU"];
     return list;
   }, [manifest, moduleKey]);
 
-  // keep selected country valid for module
   useEffect(() => {
-    if (!availableCountries.includes(country)) {
-      setCountry(availableCountries[0]);
-    }
+    if (!availableCountries.includes(country)) setCountry(availableCountries[0]);
   }, [availableCountries, country]);
 
+  // available sections for the active module
+  const sections: SidebarSection[] = useMemo(() => {
+    const list = schema?.sections?.[moduleKey] ?? [];
+    // If schema missing for PE, fallback
+    if (!list.length) return [{ key: `${moduleKey}_ALL`, label: "All" }];
+    return list.map((x) => ({ key: x.key, label: x.label }));
+  }, [schema, moduleKey]);
+
+  // keep selected section valid
+  useEffect(() => {
+    if (!sections.length) return;
+    if (!sectionKey || !sections.find((s) => s.key === sectionKey)) {
+      setSectionKey(sections[0].key);
+    }
+  }, [sections, sectionKey]);
+
+  // fetch summary when module/country changes
   useEffect(() => {
     if (!manifest) return;
     setErr(null);
@@ -73,62 +107,117 @@ export default function Home() {
       .catch((e) => setErr(String(e?.message ?? e)));
   }, [manifest, moduleKey, country]);
 
-  const filtered = useMemo(() => {
-    const qs = summary?.questions ?? [];
-    const q = search.trim().toLowerCase();
-    if (!q) return qs;
-    return qs.filter((x) => (x.title || "").toLowerCase().includes(q) || (x.itemId || "").toLowerCase().includes(q));
-  }, [summary, search]);
-
-  const modules = manifest?.modules?.map((m) => m.key) ?? ["EL", "OA", "PE"];
-
   const moduleLabel =
     manifest?.modules?.find((m) => m.key === moduleKey)?.label ??
     (moduleKey === "EL" ? "Education Landscape" : moduleKey === "OA" ? "Organisational Adoption" : moduleKey);
 
-  return (
-    <div className="shell">
-      <Sidebar modules={modules} activeModule={moduleKey} onSelectModule={setModuleKey} />
+  // Map current section -> allowed question IDs
+  const allowedIds = useMemo(() => {
+    const list = schema?.sections?.[moduleKey] ?? [];
+    const sec = list.find((x) => x.key === sectionKey);
+    // For PE or “All” fallback: empty list means “don’t filter by ids”
+    return new Set((sec?.questionIds ?? []).map(String));
+  }, [schema, moduleKey, sectionKey]);
 
-      <div className="content">
-      <main className="main">
-        <Topbar
-          title={moduleLabel}
-          breadcrumb={`Dashboards / ${moduleLabel}`}
-          countries={availableCountries}
-          country={country}
-          onCountry={setCountry}
-          search={search}
-          onSearch={setSearch}
-        />
+  const filtered = useMemo(() => {
+    const qs = summary?.questions ?? [];
+
+    // 1) Section filter (by question ids)
+    const bySection =
+      allowedIds.size > 0 ? qs.filter((q) => allowedIds.has(String(q.itemId))) : qs;
+
+    // 2) Search filter
+    const q = search.trim().toLowerCase();
+    if (!q) return bySection;
+    return bySection.filter(
+      (x) =>
+        (x.title || "").toLowerCase().includes(q) ||
+        (x.itemId || "").toLowerCase().includes(q)
+    );
+  }, [summary, search, allowedIds]);
+
+  const modules = manifest?.modules?.map((m) => m.key) ?? ["EL", "OA", "PE"];
+
+  return (
+    <div className="container">
+      <Sidebar
+        modules={modules}
+        activeModule={moduleKey}
+        onSelectModule={(m) => {
+          setModuleKey(String(m));
+          setSearch("");
+        }}
+        sections={sections}
+        activeSectionKey={sectionKey}
+        onSelectSection={(k) => {
+          setSectionKey(k);
+          setSearch("");
+        }}
+      />
+
+      <div className="main">
+        <div className="topbar">
+          <div className="topbarLeft">
+            <div className="topbarTitle">{moduleLabel}</div>
+            <div className="topbarSub">
+              Dashboards / {moduleLabel}
+              {sections.find((s) => s.key === sectionKey)?.label
+                ? ` / ${sections.find((s) => s.key === sectionKey)!.label}`
+                : ""}
+            </div>
+          </div>
+
+          <div className="topbarRight">
+            <div className="control">
+              <label>Country</label>
+              <select value={country} onChange={(e) => setCountry(e.target.value)}>
+                {availableCountries.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="control">
+              <label>Search</label>
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Question / ID…"
+              />
+            </div>
+          </div>
+        </div>
 
         {err && (
           <div className="grid">
             <div className="card cardWide">
               <div className="cardHeader">
-                <h3>Couldn’t load data</h3>
+                <div className="cardTitle">Couldn’t load data</div>
               </div>
               <div className="small">{err}</div>
               <div className="small" style={{ marginTop: 10 }}>
-                Tip: ensure the Excel file exists in <code>/data</code> and has an <b>Answers</b> sheet.
+                Tip: ensure the Excel file exists in <code>/data</code> and has an <b>Answers</b> sheet, and JSON schema files exist in <code>/data</code>.
               </div>
             </div>
           </div>
         )}
 
-        {!err && !summary && (
+        {!err && (!summary || !schema) && (
           <div className="grid">
             <div className="card cardWide">
-              <div className="small">Loading summary…</div>
+              <div className="small">Loading dashboard…</div>
             </div>
           </div>
         )}
 
-        {!err && summary && (
+        {!err && summary && schema && (
           <div className="grid">
             {filtered.slice(0, 24).map((q) => (
               <ChartCard key={q.key} title={q.title} itemId={q.itemId} total={q.total} series={q.series} />
             ))}
+
             {filtered.length > 24 && (
               <div className="card cardWide">
                 <div className="small">
@@ -138,8 +227,7 @@ export default function Home() {
             )}
           </div>
         )}
-      </main>
-    </div>
+      </div>
     </div>
   );
 }
