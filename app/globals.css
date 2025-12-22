@@ -1,4 +1,3 @@
-/* ---------------- Base ---------------- */
 *,
 *::before,
 *::after { box-sizing: border-box; }
@@ -13,8 +12,7 @@ html, body { height: 100%; }
   --muted: #6b7280;
   --border: #e5e7eb;
 
-  --accent: #ef4444;    /* red accent like video */
-  --accent2: #111827;   /* dark */
+  --accent: #ef4444;
   --shadow: 0 10px 30px rgba(17,24,39,.08);
   --shadow2: 0 6px 18px rgba(17,24,39,.08);
   --radius: 14px;
@@ -22,21 +20,29 @@ html, body { height: 100%; }
 
 body{
   margin: 0;
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial,
-    "Apple Color Emoji","Segoe UI Emoji";
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
   background: var(--bg);
   color: var(--text);
 }
 
 a{ color: inherit; text-decoration: none; }
 
-/* ---------------- App layout shell ---------------- */
-.container{
+.shell{
   display: flex;
   min-height: 100vh;
 }
 
-/* ---------------- Sidebar ---------------- */
+.content{
+  flex: 1;
+  min-width: 0;
+}
+
+.main{
+  padding: 18px 20px 28px;
+  min-width: 0;
+}
+
+/* Sidebar */
 .sidebar{
   width: 290px;
   background: var(--panel);
@@ -55,16 +61,17 @@ a{ color: inherit; text-decoration: none; }
   padding: 10px 10px 14px;
 }
 
-.badge{
+.logoMark{
   width: 36px;
   height: 36px;
   border-radius: 12px;
   display: grid;
   place-items: center;
-  font-weight: 800;
+  font-weight: 900;
   color: #fff;
   background: var(--accent);
   box-shadow: var(--shadow2);
+  text-transform: lowercase;
 }
 
 .brand h1{
@@ -78,54 +85,51 @@ a{ color: inherit; text-decoration: none; }
   color: var(--muted);
 }
 
-.navSection{ margin-top: 14px; }
 .navTitle{
   font-size: 12px;
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: .08em;
   padding: 8px 10px;
+  margin-top: 10px;
+}
+
+.navGroup{
+  margin-bottom: 10px;
 }
 
 .navItem{
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
   padding: 10px 10px;
   border-radius: 12px;
   cursor: pointer;
   border: 1px solid transparent;
-  color: var(--text);
 }
 
-.navItem:hover{
-  background: #f3f4f6;
-}
+.navItem:hover{ background: #f3f4f6; }
 
-.navItemActive{
+.navItem.active{
   background: rgba(239, 68, 68, .08);
   border: 1px solid rgba(239, 68, 68, .22);
 }
 
-.small{
-  font-size: 12px;
-  color: var(--muted);
+.subItem{
+  margin-left: 10px;
+  padding: 9px 10px;
+  border-radius: 12px;
+  cursor: pointer;
+  color: var(--text);
+  border: 1px solid transparent;
+  font-size: 13px;
 }
 
-/* ---------------- Main area ---------------- */
-.main{
-  flex: 1;
-  padding: 18px 20px 28px;
-  min-width: 0;
+.subItem:hover{ background: #f3f4f6; }
+.subItem.active{
+  background: rgba(17,24,39,.06);
+  border: 1px solid rgba(17,24,39,.12);
 }
 
-/* ---------------- Top bar (filters) ---------------- */
+/* Topbar is already in your project; this helps keep it video-neat */
 .topbar{
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -133,56 +137,7 @@ a{ color: inherit; text-decoration: none; }
   box-shadow: var(--shadow2);
 }
 
-.topbarLeft{
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.topbarTitle{
-  font-size: 16px;
-  font-weight: 800;
-  line-height: 1.2;
-}
-
-.topbarSub{
-  font-size: 12px;
-  color: var(--muted);
-}
-
-.topbarRight{
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.control{
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 8px 10px;
-}
-
-.control label{
-  font-size: 12px;
-  color: var(--muted);
-}
-
-.control select,
-.control input{
-  border: none;
-  outline: none;
-  background: transparent;
-  font-size: 13px;
-  color: var(--text);
-}
-
-/* ---------------- Grid like video ---------------- */
+/* Grid */
 .grid{
   margin-top: 14px;
   display: grid;
@@ -198,25 +153,19 @@ a{ color: inherit; text-decoration: none; }
   .grid{ grid-template-columns: 1fr; }
 }
 
-/* ---------------- Cards ---------------- */
+/* Cards */
 .card{
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 12px 12px 12px;
+  padding: 12px;
   box-shadow: var(--shadow2);
   min-width: 0;
 }
 
-.cardWide{
-  grid-column: span 3;
-}
-@media (max-width: 1200px){
-  .cardWide{ grid-column: span 2; }
-}
-@media (max-width: 860px){
-  .cardWide{ grid-column: span 1; }
-}
+.cardWide{ grid-column: span 3; }
+@media (max-width: 1200px){ .cardWide{ grid-column: span 2; } }
+@media (max-width: 860px){ .cardWide{ grid-column: span 1; } }
 
 .cardHeader{
   display: flex;
@@ -227,10 +176,9 @@ a{ color: inherit; text-decoration: none; }
 
 .cardTitle{
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 900;
   line-height: 1.25;
 
-  /* clamp long questions to avoid messy cards */
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -258,7 +206,6 @@ a{ color: inherit; text-decoration: none; }
   gap: 10px;
 }
 
-/* chart area fixed height so all cards align neatly */
 .chartWrap{
   width: 100%;
   height: 220px;
@@ -268,12 +215,10 @@ a{ color: inherit; text-decoration: none; }
   background: #fff;
 }
 
-/* ---------------- Legend block ---------------- */
+/* Legend */
 .legend{
   border-top: 1px solid var(--border);
   padding-top: 10px;
-
-  /* prevent card from growing too tall */
   max-height: 160px;
   overflow: auto;
 }
@@ -285,10 +230,7 @@ a{ color: inherit; text-decoration: none; }
   padding: 6px 0;
   border-bottom: 1px dashed rgba(17,24,39,.08);
 }
-
-.legendRow:last-child{
-  border-bottom: none;
-}
+.legendRow:last-child{ border-bottom: none; }
 
 .legendLeft{
   display: flex;
@@ -320,19 +262,8 @@ a{ color: inherit; text-decoration: none; }
   align-items: center;
   flex: 0 0 auto;
 }
-
-.legendValue{
-  font-weight: 800;
-  min-width: 36px;
-  text-align: right;
-}
-
-.legendPct{
-  color: var(--muted);
-  font-weight: 700;
-  min-width: 54px;
-  text-align: right;
-}
+.legendValue{ font-weight: 900; min-width: 36px; text-align: right; }
+.legendPct{ color: var(--muted); font-weight: 800; min-width: 54px; text-align: right; }
 
 .legendNote{
   font-size: 12px;
@@ -340,7 +271,7 @@ a{ color: inherit; text-decoration: none; }
   padding-top: 8px;
 }
 
-/* ---------------- Recharts tooltip polish ---------------- */
+/* Recharts tooltip */
 .recharts-tooltip-wrapper{ z-index: 50; }
 .recharts-default-tooltip{
   background: #fff !important;
@@ -351,7 +282,7 @@ a{ color: inherit; text-decoration: none; }
   padding: 8px 10px !important;
 }
 
-/* Scrollbars (neat) */
+/* Scrollbars */
 ::-webkit-scrollbar{ width: 8px; height: 8px; }
 ::-webkit-scrollbar-thumb{ background: #d1d5db; border-radius: 10px; }
 ::-webkit-scrollbar-track{ background: transparent; }
