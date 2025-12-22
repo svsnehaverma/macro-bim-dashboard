@@ -1,261 +1,357 @@
-/* ========= Base ========= */
-:root{
-  --bg: #F3F6FB;
-  --panel: #FFFFFF;
-  --text: #111827;
-  --muted: #6B7280;
-  --border: #E6EAF2;
-  --shadow: 0 10px 28px rgba(16, 24, 40, 0.08);
-  --shadow-soft: 0 6px 18px rgba(16, 24, 40, 0.06);
-  --radius: 18px;
-  --radius-sm: 14px;
-}
-
+/* ---------------- Base ---------------- */
 *,
 *::before,
-*::after{
-  box-sizing: border-box;
-}
+*::after { box-sizing: border-box; }
 
-html, body{
-  height: 100%;
+html, body { height: 100%; }
+
+:root{
+  --bg: #f6f7fb;
+  --panel: #ffffff;
+  --panel2: #fbfbfd;
+  --text: #111827;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+
+  --accent: #ef4444;    /* red accent like video */
+  --accent2: #111827;   /* dark */
+  --shadow: 0 10px 30px rgba(17,24,39,.08);
+  --shadow2: 0 6px 18px rgba(17,24,39,.08);
+  --radius: 14px;
 }
 
 body{
   margin: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial,
+    "Apple Color Emoji","Segoe UI Emoji";
   background: var(--bg);
   color: var(--text);
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial,
-    "Apple Color Emoji","Segoe UI Emoji";
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 a{ color: inherit; text-decoration: none; }
 
-/* ========= Page container ========= */
-main{
-  padding: 18px 18px 30px;
+/* ---------------- App layout shell ---------------- */
+.container{
+  display: flex;
+  min-height: 100vh;
 }
 
-/* ========= Card (Video-style) ========= */
+/* ---------------- Sidebar ---------------- */
+.sidebar{
+  width: 290px;
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+  padding: 16px 14px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: auto;
+}
+
+.brand{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 10px 14px;
+}
+
+.badge{
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  color: #fff;
+  background: var(--accent);
+  box-shadow: var(--shadow2);
+}
+
+.brand h1{
+  font-size: 14px;
+  margin: 0;
+  letter-spacing: .2px;
+}
+.brand p{
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.navSection{ margin-top: 14px; }
+.navTitle{
+  font-size: 12px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  padding: 8px 10px;
+}
+
+.navItem{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 10px;
+  border-radius: 12px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  color: var(--text);
+}
+
+.navItem:hover{
+  background: #f3f4f6;
+}
+
+.navItemActive{
+  background: rgba(239, 68, 68, .08);
+  border: 1px solid rgba(239, 68, 68, .22);
+}
+
+.small{
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ---------------- Main area ---------------- */
+.main{
+  flex: 1;
+  padding: 18px 20px 28px;
+  min-width: 0;
+}
+
+/* ---------------- Top bar (filters) ---------------- */
+.topbar{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  box-shadow: var(--shadow2);
+}
+
+.topbarLeft{
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.topbarTitle{
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.topbarSub{
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.topbarRight{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.control{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 8px 10px;
+}
+
+.control label{
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.control select,
+.control input{
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 13px;
+  color: var(--text);
+}
+
+/* ---------------- Grid like video ---------------- */
+.grid{
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+@media (max-width: 1200px){
+  .grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 860px){
+  .sidebar{ display:none; }
+  .grid{ grid-template-columns: 1fr; }
+}
+
+/* ---------------- Cards ---------------- */
 .card{
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  box-shadow: var(--shadow-soft);
-  padding: 16px 16px 14px;
-  display: flex;
-  flex-direction: column;
-  min-height: 100%;
-  transition: transform 120ms ease, box-shadow 120ms ease;
+  padding: 12px 12px 12px;
+  box-shadow: var(--shadow2);
+  min-width: 0;
 }
 
-.card:hover{
-  transform: translateY(-1px);
-  box-shadow: var(--shadow);
+.cardWide{
+  grid-column: span 3;
+}
+@media (max-width: 1200px){
+  .cardWide{ grid-column: span 2; }
+}
+@media (max-width: 860px){
+  .cardWide{ grid-column: span 1; }
 }
 
-/* header */
 .cardHeader{
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 10px;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
-/* Title clamps neatly like the video */
 .cardTitle{
-  margin: 0;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 800;
   line-height: 1.25;
-  letter-spacing: -0.01em;
 
+  /* clamp long questions to avoid messy cards */
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-/* content */
-.cardContent{
+.cardMeta{
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
-/* Two-column layout: donut left, legend right */
-.cardGrid{
-  display: grid;
-  grid-template-columns: 1.05fr 0.95fr;
-  gap: 14px;
-  align-items: center;
-}
-
-.cardGrid.single{
-  grid-template-columns: 1fr;
-}
-
-/* Chart area */
-.chartPane{
-  min-width: 0;
-}
-
-.chartPane.wide{
-  width: 100%;
-}
-
-.chartBox{
-  width: 100%;
-  height: 220px;
-  border-radius: var(--radius-sm);
-  background: #ffffff;
+.pill{
+  font-size: 12px;
+  color: var(--muted);
   border: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
+  background: var(--panel2);
+  padding: 6px 8px;
+  border-radius: 999px;
 }
 
-.chartBox.tall{
-  height: 260px;
-}
-
-/* Legend */
-.legendPane{
-  min-width: 0;
+.cardBody{
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.legendList{
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+/* chart area fixed height so all cards align neatly */
+.chartWrap{
+  width: 100%;
+  height: 220px;
+  border: 1px dashed rgba(17,24,39,.10);
+  border-radius: 12px;
+  padding: 8px;
+  background: #fff;
+}
 
-  /* prevents ugly overflow when many lines */
-  max-height: 190px;
+/* ---------------- Legend block ---------------- */
+.legend{
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+
+  /* prevent card from growing too tall */
+  max-height: 160px;
   overflow: auto;
-  padding-right: 6px;
 }
 
 .legendRow{
   display: flex;
-  align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px dashed rgba(17,24,39,.08);
+}
+
+.legendRow:last-child{
+  border-bottom: none;
 }
 
 .legendLeft{
   display: flex;
-  align-items: flex-start;
-  gap: 10px;
+  align-items: center;
+  gap: 8px;
   min-width: 0;
-  flex: 1;
 }
 
-.legendDot{
+.dot{
   width: 10px;
   height: 10px;
   border-radius: 999px;
-  margin-top: 4px;
   flex: 0 0 auto;
 }
 
 .legendLabel{
   font-size: 12px;
-  line-height: 1.25;
-  color: #111827;
-
-  /* wrap like the video (2 lines max) */
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  color: var(--text);
   min-width: 0;
+  max-width: 260px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .legendRight{
-  flex: 0 0 auto;
   display: flex;
-  justify-content: flex-end;
-  min-width: 68px;
+  gap: 12px;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.legendValue{
+  font-weight: 800;
+  min-width: 36px;
+  text-align: right;
 }
 
 .legendPct{
-  font-size: 12px;
-  font-weight: 700;
-  color: #111827;
-}
-
-/* Footer inside legend */
-.legendFooter{
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 10px;
-  padding-top: 8px;
-  border-top: 1px dashed var(--border);
-}
-
-.muted{
   color: var(--muted);
+  font-weight: 700;
+  min-width: 54px;
+  text-align: right;
+}
+
+.legendNote{
   font-size: 12px;
+  color: var(--muted);
+  padding-top: 8px;
 }
 
-.totalNumber{
-  font-size: 14px;
-  font-weight: 800;
-  letter-spacing: -0.01em;
-}
-
-/* ========= Recharts polish ========= */
-.recharts-tooltip-wrapper{
-  z-index: 50;
-}
-
+/* ---------------- Recharts tooltip polish ---------------- */
+.recharts-tooltip-wrapper{ z-index: 50; }
 .recharts-default-tooltip{
-  background: #ffffff !important;
-  border-radius: 12px !important;
+  background: #fff !important;
   border: 1px solid var(--border) !important;
-  padding: 10px 12px !important;
-  font-size: 12px !important;
+  border-radius: 12px !important;
   box-shadow: var(--shadow) !important;
+  font-size: 12px !important;
+  padding: 8px 10px !important;
 }
 
-.recharts-cartesian-axis-tick-value{
-  fill: #4B5563;
-  font-size: 11px;
-}
-
-/* ========= Scrollbar (subtle) ========= */
-::-webkit-scrollbar{
-  width: 8px;
-  height: 8px;
-}
-::-webkit-scrollbar-track{
-  background: transparent;
-}
-::-webkit-scrollbar-thumb{
-  background: #D7DCE8;
-  border-radius: 999px;
-}
-::-webkit-scrollbar-thumb:hover{
-  background: #C7CDDD;
-}
-
-/* ========= Small screens ========= */
-@media (max-width: 900px){
-  .cardGrid{
-    grid-template-columns: 1fr;
-  }
-  .legendList{
-    max-height: 160px;
-  }
-  .chartBox{
-    height: 210px;
-  }
-}
+/* Scrollbars (neat) */
+::-webkit-scrollbar{ width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb{ background: #d1d5db; border-radius: 10px; }
+::-webkit-scrollbar-track{ background: transparent; }
