@@ -23,18 +23,20 @@ const palette = [
   "#f97316",
   "#10b981",
   "#a78bfa",
+  "#22c55e",
+  "#f59e0b",
   "#06b6d4",
 ];
-
-const truncate = (s: string, n = 34) => {
-  const str = String(s ?? "").trim();
-  return str.length > n ? str.slice(0, n - 1) + "…" : str;
-};
 
 function pct(v: number, total: number) {
   if (!total) return "0%";
   return ((v / total) * 100).toFixed(1) + "%";
 }
+
+const truncate = (s: string, n = 28) => {
+  const str = String(s ?? "").trim();
+  return str.length > n ? str.slice(0, n - 1) + "…" : str;
+};
 
 export function ChartCard(props: {
   title: string;
@@ -44,9 +46,12 @@ export function ChartCard(props: {
 }) {
   const { title, itemId, total, series } = props;
 
+  // Decide chart type
   const isPie = series.length <= 6;
+
+  // Keep top N categories for clean visuals
   const top = series.slice(0, 10);
-  const hidden = Math.max(0, series.length - top.length);
+  const restCount = Math.max(0, series.length - top.length);
 
   return (
     <div className="card">
@@ -70,7 +75,7 @@ export function ChartCard(props: {
                   data={top}
                   dataKey="value"
                   nameKey="name"
-                  innerRadius={60}
+                  innerRadius={62}
                   outerRadius={90}
                   paddingAngle={2}
                   stroke="#fff"
@@ -81,6 +86,8 @@ export function ChartCard(props: {
                     <Cell key={i} fill={palette[i % palette.length]} />
                   ))}
                 </Pie>
+
+                {/* Full labels in tooltip */}
                 <Tooltip
                   formatter={(value: any, _name: any, item: any) => {
                     const full = item?.payload?.name ?? _name;
@@ -99,9 +106,9 @@ export function ChartCard(props: {
                 <YAxis
                   type="category"
                   dataKey="name"
-                  width={190}
+                  width={180}
                   tick={{ fontSize: 11 }}
-                  tickFormatter={(v) => truncate(String(v), 32)}
+                  tickFormatter={(v) => truncate(String(v), 28)}
                 />
                 <Tooltip
                   formatter={(value: any, _name: any, item: any) => {
@@ -115,11 +122,15 @@ export function ChartCard(props: {
           </ResponsiveContainer>
         </div>
 
+        {/* Clean legend list (scroll if too long) */}
         <div className="legend">
           {top.map((s, i) => (
             <div key={s.name} className="legendRow">
               <div className="legendLeft">
-                <span className="dot" style={{ background: isPie ? palette[i % palette.length] : "#ef4444" }} />
+                <span
+                  className="dot"
+                  style={{ background: isPie ? palette[i % palette.length] : "#ef4444" }}
+                />
                 <span className="legendLabel" title={s.name}>
                   {s.name}
                 </span>
@@ -131,7 +142,9 @@ export function ChartCard(props: {
             </div>
           ))}
 
-          {hidden > 0 ? <div className="legendNote">Showing top {top.length}. Hidden: {hidden} options.</div> : null}
+          {restCount > 0 ? (
+            <div className="legendNote">Showing top {top.length}. Hidden: {restCount} options.</div>
+          ) : null}
         </div>
       </div>
     </div>
